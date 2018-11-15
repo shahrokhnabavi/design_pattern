@@ -1,0 +1,118 @@
+#!/usr/bin/env bash
+
+function uppercase() {
+    echo `echo $1 | tr [a-z] [A-Z]`
+}
+
+function lower() {
+    echo `echo $1 | tr [A-Z] [a-z]`
+}
+
+function ufirst() {
+    first=`echo $1 | cut -c1 | tr [a-z] [A-Z]`
+    second=`echo $1 | cut -c2-`
+    echo $first$second
+}
+
+if [ $# -gt 0 ]; then
+
+    if [ "$1" == "up" ]; then
+        shift 1
+        docker-compose up -d "$@"
+
+    elif [ "$1" == "down" ]; then
+        docker-compose down
+
+    elif [ "$1" == "php" ]; then
+        shift 1
+        docker-compose exec web php "$@"
+
+    elif [ "$1" == "composer" ]; then
+        shift 1
+        docker-compose exec web composer "$@"
+
+    elif [ "$1" == "unit_test" ]; then
+        shift 1
+        docker-compose exec web ./vendor/bin/phpunit -c ./test/phpunit.xml "$@"
+
+    elif [ "$1" == "npm" ]; then
+        shift 1
+        cmd="npm $@"
+        docker-compose run --rm node sh -c "cd /angular && $cmd"
+
+    elif [ "$1" == "yarn" ]; then
+        shift 1
+        docker-compose run --rm node yarn "$@"
+
+    elif [ "$1" == "grunt" ]; then
+        shift 1
+        docker-compose run --rm node grunt "$@"
+
+    elif [ "$1" == "ng" ]; then
+        shift; command=$1; shift
+        case "$command" in
+            "new-app")
+                docker-compose run --rm node sh -c "cd /angular && ng new $1 -SG --directory ./"
+                ;;
+            "serve")
+                docker-compose run --rm -p 4200:4200 node sh -c "cd /angular && ng serve --host 0.0.0.0"
+                ;;
+            "dev-build")
+                docker-compose run --rm node sh -c "cd /angular && ng build --watch && rm /opt/public/angular/index.html"
+                ;;
+            *)
+                cmd="ng $command $@"
+                docker-compose run --rm node sh -c "cd /angular && $cmd"
+                ;;
+        esac
+        # ./dev ng new cmsAdmin --directory ./ --skip-install
+
+    elif [ "$1" == "doctrine-module" ]; then
+        if [ $# == 1 ]; then
+            docker-compose exec web ./vendor/bin/doctrine-module list
+        else
+            shift 1
+            docker-compose exec web ./vendor/bin/doctrine-module "$@"
+        fi
+
+    elif [ "$1" == "doctrine" ]; then
+        docker-compose exec web ./vendor/bin/doctrine-module orm:convert:mapping \
+                    --namespace="`ufirst $2`\\Entity\\" --force \
+                    --from-database annotation ./module/`ufirst $2`/src/
+
+    elif [ "$1" == "zf" ]; then
+        shift; command=$1; shift
+        case "$command" in
+            "module")
+                while getopts "c:r:" opt; do
+                    case ${opt} in
+                        c )
+                            docker-compose exec web php /opt/zend/zf.php create ${OPTARG}
+                            ;;
+                        r )
+                            docker-compose exec web php /opt/zend/zf.php remove ${OPTARG}
+                            ;;
+                        \? )
+                            echo "Invalid Option: -$OPTARG" 1>&2;
+                            echo "./dev zf module -c NewModuleName\n"
+                            echo "./dev zf module -r ModuleName\n"
+                            exit 1
+                            ;;
+                    esac
+                done
+                ;;
+            "install")
+                docker-compose exec web composer create-project -sdev zendframework/skeleton-application .
+                ;;
+        esac
+    else
+        docker-compose "$@"
+    fi
+
+#    docker images
+#    docker ps -a
+#    docker build -t nari/wep -f ./docker/app/Dockerfile .
+#    docker build -t nari/node -f ./docker/node/Dockerfile .
+else
+    docker-compose ps
+fi

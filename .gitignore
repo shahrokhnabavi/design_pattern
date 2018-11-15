@@ -1,0 +1,9 @@
+.idea
+local-data/**
+**/node_modules
+**/vendor
+
+source/backend/data/cache/*
+source/backend/data/mail/*
+source/backend/data/upload/*
+source/backend/data/tmp/*
