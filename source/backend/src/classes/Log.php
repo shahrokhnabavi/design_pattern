@@ -16,7 +16,7 @@ class Log
 
     private function __construct(string $scope)
     {
-        $path = sprintf('%s/../data/logs/%s.log', __DIR__, $scope);
+        $path = sprintf('%s/../../data/logs/%s.log', __DIR__, $scope);
 
         // Create the logger
         $this->logger = new Logger($scope);

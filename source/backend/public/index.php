@@ -1,8 +1,17 @@
 <?php
 
+use App\Singleton\DatabaseConnection;
+use Libraries\Log;
+
 // Load dependencies
 require __DIR__."/../vendor/autoload.php";
 
-\Libraries\Log::getInstance()->info('Application starts...');
+Log::getInstance()->info('Application is started ...');
 
-echo 'hello';
+
+$db1 = DatabaseConnection::getInstance()->connect();
+$db2 = DatabaseConnection::getInstance();
+var_dump($db1, $db2);
+
+
+echo '<br/>Done';

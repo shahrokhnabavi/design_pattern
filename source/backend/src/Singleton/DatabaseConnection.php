@@ -2,6 +2,8 @@
 
 namespace App\Singleton;
 
+use Libraries\Log;
+
 class DatabaseConnection
 {
     /** @var DatabaseConnection */
@@ -20,6 +22,7 @@ class DatabaseConnection
     }
 
     public function connect(): bool {
+        Log::getInstance()->info('Db is connected.');
         return true;
     }
 }
