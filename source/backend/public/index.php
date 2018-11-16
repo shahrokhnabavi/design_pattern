@@ -7,4 +7,4 @@ require __DIR__."/../vendor/autoload.php";
 
 Log::getInstance()->info('Application is started ...');
 
-\App\Application::run($_GET['type'] ?? 'singleton');
+\App\Application::run($_GET['type'] ?? '');

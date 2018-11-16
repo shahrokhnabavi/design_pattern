@@ -2,17 +2,26 @@
 
 namespace App;
 
+use App\Factory\ShapeFactory;
 use App\Singleton\DatabaseConnection;
 
 class Application
 {
     private static $validAppType = [
-        'singleton' => [self::class, 'singleton']
+        'singleton' => [self::class, 'singleton'],
+        'factory' => [self::class, 'factory'],
+        'strategy' => [self::class, 'strategy'],
     ];
 
     public static function run(string $type): Application
     {
         $app = new Application();
+
+        if (!isset(static::$validAppType[$type])) {
+            echo file_get_contents(__DIR__.'/index.html');
+            return $app;
+        }
+
         call_user_func(static::$validAppType[$type]);
 
         echo '<hr/>Done';
@@ -30,5 +39,21 @@ class Application
         var_dump($db1, $db2);
         var_dump($db1->connect());
 
+    }
+
+    private function factory(): void
+    {
+        echo file_get_contents(__DIR__.'/Factory/info.html');
+
+        $shape = new ShapeFactory();
+
+        $rect1 = $shape->create('rect');
+        $rect2 = $shape->create('rect');
+        $circle = $shape->create('circle');
+
+        var_dump($rect1, $rect2, $circle);
+
+        $rect1->draw();
+        $circle->draw();
     }
 }
