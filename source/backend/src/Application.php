@@ -4,6 +4,9 @@ namespace App;
 
 use App\Factory\ShapeFactory;
 use App\Singleton\DatabaseConnection;
+use App\Strategy\Bird;
+use App\Strategy\Dog;
+use App\Strategy\FlyBehavior\FlyHigh;
 
 class Application
 {
@@ -56,4 +59,21 @@ class Application
         $rect1->draw();
         $circle->draw();
     }
+
+    private function Strategy(): void
+    {
+        echo file_get_contents(__DIR__.'/Strategy/info.html');
+
+        $tedi = new Dog('Tedy');
+        $jack = new Bird('Jack');
+
+        $tedi->getInfo();
+        echo '<br/>';
+        $jack->getInfo();
+        echo '<br/>';
+
+        $jack->setFlyType(new FlyHigh());
+        $jack->getInfo();
+    }
+
 }
