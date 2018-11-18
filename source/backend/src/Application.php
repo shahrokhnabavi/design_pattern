@@ -2,6 +2,13 @@
 
 namespace App;
 
+use App\Adapter\Facebook;
+use App\Adapter\Tweeter;
+use App\Adapter\TweeterAdapter;
+use App\Decorator\Behavior\EmailLogger;
+use App\Decorator\Behavior\SMSLogger;
+use App\Decorator\FileLoggerConcrete;
+use App\Facade\PageFacade;
 use App\Factory\ShapeFactory;
 use App\Singleton\DatabaseConnection;
 use App\Strategy\Bird;
@@ -14,6 +21,11 @@ class Application
         'singleton' => [self::class, 'singleton'],
         'factory' => [self::class, 'factory'],
         'strategy' => [self::class, 'strategy'],
+        'adapter' => [self::class, 'adapter'],
+        'facade' => [self::class, 'facade'],
+        'decorator' => [self::class, 'decorator'],
+        'command' => [self::class, 'command'],
+        'observer' => [self::class, 'observer'],
     ];
 
     public static function run(string $type): Application
@@ -60,7 +72,7 @@ class Application
         $circle->draw();
     }
 
-    private function Strategy(): void
+    private function strategy(): void
     {
         echo file_get_contents(__DIR__.'/Strategy/info.html');
 
@@ -76,4 +88,52 @@ class Application
         $jack->getInfo();
     }
 
+    private function adapter(): void
+    {
+        echo file_get_contents(__DIR__.'/Adapter/info.html');
+
+        $facebook = new Facebook();
+        $facebook->connect('shahrokh', '123');
+        $facebook->post('Hi my friends');
+
+        echo '<br/>';
+        $tweeter = new Tweeter('shahrokh', '123');
+        $tweeter->postToWall('happy new year');
+
+        echo '<br/><b>Using Adapter</b><br/>';
+        $tweeterAdapter = new TweeterAdapter();
+        $tweeterAdapter->connect('shahrokh', '123');
+        $tweeterAdapter->post('This message come from adapter');
+    }
+
+    private function facade(): void
+    {
+        echo file_get_contents(__DIR__.'/Facade/info.html');
+
+        $facade = new PageFacade();
+        $facade->createAndServe(12, 'Test for Wrong user ID');
+        echo '<br/>';
+        $facade->createAndServe(2, 'Fetch user ID');
+    }
+
+    private function decorator(): void
+    {
+        echo file_get_contents(__DIR__.'/Decorator/info.html');
+
+        $log = new FileLoggerConcrete();
+        $log = new EmailLogger($log);
+        $log = new SMSLogger($log);
+
+        $log->log('Saving User');
+    }
+
+    private function command(): void
+    {
+        echo file_get_contents(__DIR__.'/Command/info.html');
+    }
+
+    private function observer(): void
+    {
+        echo file_get_contents(__DIR__.'/Observer/info.html');
+    }
 }
